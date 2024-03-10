@@ -1,17 +1,23 @@
-import { Elysia } from 'elysia'
+import { Elysia } from "elysia";
 import { ip } from "./ip";
+import { limiter } from "./limiter";
 
+const app = new Elysia();
 
-const api = new Elysia({ prefix: '/api' })
-  .get('/echo/:message', ({ params: { message } }) => `Echo: ${message}`)
-  .get('/whoami', ({ ip }) => `Your IP is: ${ip}`)
+const api = new Elysia({ prefix: "/api" })
+  .get("/echo/:message", ({ params: { message } }) => `Echo: ${message}`)
+  .get("/whoami", ({ ip }) => `Your IP is: ${ip}`);
 
-const app = new Elysia()
-  // .use(app => app.derive(({ request }) => ({ ip: app.server?.requestIP(request) })))
-  // .use(ip({ checkHeaders: ['x-forwarded-for']}))
+const limitedApi = new Elysia({ prefix: "/api/v2" })
+  .use(limiter())
+  .get("/echo/:message", ({ params: { message } }) => `Echo: ${message}`)
+  .get("/whoami", ({ ip }) => `Your IP is: ${ip}`);
+
+app
+  .get("/", () => "Hello World from Elysia")
   .use(ip())
   .use(api)
-	.get('/', () => 'Hello World from Elysia')
-	.listen(3000)
+  .use(limitedApi)
+  .listen(3000);
 
-console.log(`🦊 Elysia is running at on port ${app.server?.port}...`)
+console.log(`🦊 Elysia is running at on port ${app.server?.port}...`);
