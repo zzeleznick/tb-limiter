@@ -1,31 +1,17 @@
-import { Hono } from 'hono'
-import * as net from 'node:net'
+import { Elysia } from 'elysia'
+import { ip } from "./ip";
 
-const app = new Hono()
-const api = new Hono()
 
-app.get('/', (c) => {
-  return c.text('Hello World from Hono!')
-})
+const api = new Elysia({ prefix: '/api' })
+  .get('/echo/:message', ({ params: { message } }) => `Echo: ${message}`)
+  .get('/whoami', ({ ip }) => `Your IP is: ${ip}`)
 
-api.get('/echo/:message?', (c) => {
-  const { message = 'Hello World!' } = c.req.param()
-  return c.text(`Echo: ${message}`)
-})
+const app = new Elysia()
+  // .use(app => app.derive(({ request }) => ({ ip: app.server?.requestIP(request) })))
+  // .use(ip({ checkHeaders: ['x-forwarded-for']}))
+  .use(ip())
+  .use(api)
+	.get('/', () => 'Hello World from Elysia')
+	.listen(3000)
 
-api.get('/whoami', (c) => {
-  const userAgent = c.req.header('User-Agent')
-  const sourceIP = c.req.raw.headers.get('x-forwarded-for')
-  let connectionInfo = sourceIP
-  if (!sourceIP) {
-    const socketAddress = new net.Socket().address() as net.AddressInfo
-    const ip = socketAddress?.address
-    const port = socketAddress?.port
-    connectionInfo = `${ip}:${port}`
-  }
-  return c.text(`Echo: ${connectionInfo}`)
-})
-
-app.route('/api', api)
-
-export default app
+console.log(`🦊 Elysia is running at on port ${app.server?.port}...`)
