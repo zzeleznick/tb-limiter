@@ -1,9 +1,13 @@
 {
+  "name": "tb-limiter",
+  "module": "src/index.ts",
+  "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
   },
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
     "elysia": "^0.8.17"
