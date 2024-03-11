@@ -1,7 +1,7 @@
 // Limiter for rate limiting
 // plugin modeled from https://github.com/rayriffy/elysia-rate-limit/blob/fc6e38571a5a7512785d485bf29fbd26b74aeaad/src/services/plugin.ts
 import { type Elysia } from "elysia";
-import { type ApiEvent, createEvent } from "./api";
+import { type ApiEvent, postEvent, getHitCount } from "./api";
 
 export type MinTimeUnits = "ns" | "us" | "ms";
 
@@ -29,8 +29,38 @@ export const now = (units: MinTimeUnits = "ms") => {
 };
 
 const maxPerDuration = 5;
-const durationMs = 1000 * 60; // 60 seconds
+const durationInSeconds = 60;
 
+// Send event to Tinybird with timing
+const wrappedSendEvent = async (event: ApiEvent) => {
+  const start = now_us();
+  console.log(`[${start}] wrappedSendEvent: ${JSON.stringify(event)}`);
+  await postEvent(event);
+  console.log(`[${now_us()}] wrappedSendEvent done in ${now_us() - start}us`);
+}
+
+// Check on usage
+const wrappedGetHitCount = async (ip: string, lookback_sec = durationInSeconds) => {
+  const start = now_us();
+  console.log(`[${start}] wrappedGetHitCount: ${ip}`);
+  const count = await getHitCount(ip, lookback_sec);
+  console.log(`[${now_us()}] wrappedGetHitCount done in ${now_us() - start}us`);
+  return count;
+}
+
+// Concurrent write event and check usage
+const concurrentWriteAndCheck = async (ip: string, event: ApiEvent) => {
+  const start = now_us();
+  console.log(`[${start}] concurrentWriteAndCheck: ${ip}`);
+  const [count, _] = await Promise.all([
+    wrappedGetHitCount(ip),
+    wrappedSendEvent(event),
+  ]);
+  console.log(`[${now_us()}] concurrentWriteAndCheck done in ${now_us() - start}us`);
+  return count;
+}
+
+// Rate limiter plugin
 export const limiter = () => {
   return (app: Elysia) => {
     app.onBeforeHandle(async ({ set, request, ip }) => {
@@ -45,11 +75,8 @@ export const limiter = () => {
         dt: new Date().toISOString(),
         ts: now("us"),
       } as ApiEvent;
-      const start = now_us();
-      console.log(`[${start}] Event: ${JSON.stringify(event)}`);
-      await createEvent(event);
-      console.log(`[${now_us()}] Event created in ${now_us() - start}us`);
-      const hits = 0;
+      // Send api usage event to Tinybird
+      const hits = await concurrentWriteAndCheck(ip, event);
       const limit = maxPerDuration;
       // reject if limit were reached
       if (hits + 1 > limit) {

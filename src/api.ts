@@ -13,7 +13,7 @@ export type HitCountResponse = {
   }[];
 };
 
-export const createEvent = async (event: ApiEvent) => {
+export const postEvent = async (event: ApiEvent) => {
   const response = await fetch(
     "https://api.us-east.aws.tinybird.co/v0/events?name=v2_api_usage",
     {
@@ -27,9 +27,9 @@ export const createEvent = async (event: ApiEvent) => {
   return await response.json();
 };
 
-export const getHitCount = async (ip: string, lookback = 60) => {
+export const getHitCount = async (ip: string, lookback_sec = 60) => {
   const response = await fetch(
-    `https://api.us-east.aws.tinybird.co/v0/pipes/last_hits_ct.json?ip=${ip}&lookback_sec=${lookback}`,
+    `https://api.us-east.aws.tinybird.co/v0/pipes/last_hits_ct.json?ip=${ip}&lookback_sec=${lookback_sec}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`,
