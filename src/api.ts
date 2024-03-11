@@ -10,7 +10,7 @@ export type ApiEvent = {
 
 export const createEvent = async (event: ApiEvent) => {
   const response = await fetch(
-    "https://api.us-east.aws.tinybird.co/v0/events?name=api_usage",
+    "https://api.us-east.aws.tinybird.co/v0/events?name=v2_api_usage",
     {
       method: "POST",
       body: JSON.stringify(event),

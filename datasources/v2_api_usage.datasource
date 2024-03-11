@@ -1,0 +1,12 @@
+DESCRIPTION Usage logs for the API
+
+SCHEMA >
+    `dt` String `json:$.dt`,
+    `ip` String `json:$.ip`,
+    `method` LowCardinality(String) `json:$.method`,
+    `path` String `json:$.path`,
+    `tier` LowCardinality(String) `json:$.tier`,
+    `ts` Int64 `json:$.ts`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "dt, path, tier, ts"
