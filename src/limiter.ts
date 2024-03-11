@@ -5,17 +5,19 @@ import { type ApiEvent, postEvent, getHitCount } from "./api";
 
 export type MinTimeUnits = "ns" | "us" | "ms";
 
+/* NOTE:
+```
+Bun.nanoseconds() ~= BigInt(Math.floor(1_000_000 * performance.now()))
+```
+For our purposes, we will use the more cross-platform `performance.now()` for now.
+*/
+
 // Returns the current time in nanoseconds
-// NOTE: Bun.nanoseconds() / BigInt(1_000_000) ~= performance.now()
-export const now_ns = () =>
-  BigInt(Bun.nanoseconds()) + BigInt(1_000_000 * performance.timeOrigin);
-
+export const now_ns = () => BigInt(Math.floor(1_000_000 * performance.now())) + BigInt(1_000_000 * performance.timeOrigin)
 // Returns the current time in microseconds
-export const now_us = () => Number(now_ns() / BigInt(1_000));
-
+export const now_us = () => Math.floor(1_000 * performance.now()) + Math.floor(1_000 * performance.timeOrigin)
 // Returns the current time in milliseconds
-// NOTE: Equivalent to Date.now()
-export const now_ms = () => Number(now_ns() / BigInt(1_000_000));
+export const now_ms = () => Date.now();
 
 export const now = (units: MinTimeUnits = "ms") => {
   switch (units) {
