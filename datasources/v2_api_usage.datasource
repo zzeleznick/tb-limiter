@@ -1,7 +1,8 @@
 DESCRIPTION Usage logs for the API
 
 SCHEMA >
-    `dt` String `json:$.dt`,
+    `date` Date `json:$.date`,
+    `dt` DateTime64(3) `json:$.dt`,
     `ip` String `json:$.ip`,
     `method` LowCardinality(String) `json:$.method`,
     `path` String `json:$.path`,
@@ -9,4 +10,4 @@ SCHEMA >
     `ts` Int64 `json:$.ts`
 
 ENGINE "MergeTree"
-ENGINE_SORTING_KEY "dt, path, tier, ts"
+ENGINE_SORTING_KEY "date, tier, dt, ts, path, ip"

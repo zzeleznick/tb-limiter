@@ -1,0 +1,18 @@
+DESCRIPTION >
+	Last hits by time and IP
+
+
+TOKEN "last_hits_ct_endpoint_read_0885" READ
+
+NODE last_hits_by_ip
+SQL >
+
+    %
+    {% set ip = '75.84.38.48' %}
+    {% set lookback_sec = 60 %}
+    {% if not defined(ip) %} {{ error('ip (String) query param is required') }} {% end %}
+    SELECT COUNT(*) AS ct
+    FROM v2_api_usage
+    WHERE ip ={{ String(ip) }} AND dateDiff('ss', fromUnixTimestamp64Micro(ts), now64(6)) < {{ Int64(lookback_sec) }}
+
+

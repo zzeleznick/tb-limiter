@@ -69,12 +69,15 @@ export const limiter = () => {
       const path = (new URL(request.url)?.pathname) ?? "";
       const clientKey = ip;
       console.log(`clientKey: ${clientKey}, path: ${path}`);
+      const dt = new Date().toISOString();
+      const date = dt.slice(0, 10);
       const event = {
+        date,
+        dt,
         ip,
-        tier: "free",
-        path,
         method: request.method,
-        dt: new Date().toISOString(),
+        path,
+        tier: "free",
         ts: now("us"),
       } as ApiEvent;
       // Send api usage event to Tinybird
