@@ -44,7 +44,7 @@ export const ip = (config: {
         if (globalThis.Bun) {
             if (!app.server) throw new Error(`Elysia server is not initialized. Make sure to call Elyisa.listen()`)
             return {
-                ip: clientIP ?? app.server.requestIP(request)
+                ip: clientIP ?? app.server.requestIP(request)?.address
             }
         }
         return {

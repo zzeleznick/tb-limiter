@@ -4,6 +4,9 @@ import { limiter } from "./limiter";
 
 const app = new Elysia();
 
+const token = process.env.TINYBIRD_API_KEY
+console.log(`TINYBIRD_API_KEY: ${token}`)
+
 const api = new Elysia({ prefix: "/api" })
   .get("/echo/:message", ({ params: { message } }) => `Echo: ${message}`)
   .get("/whoami", ({ ip }) => `Your IP is: ${ip}`);
