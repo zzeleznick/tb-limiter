@@ -33,12 +33,14 @@ export const now = (units: MinTimeUnits = "ms") => {
 const maxPerDuration = 5;
 const durationInSeconds = 60;
 
+const ms_from = (start_us: number) => Math.floor((now_us() - start_us) / 1_000);
+
 // Send event to Tinybird with timing
 const wrappedSendEvent = async (event: ApiEvent) => {
   const start = now_us();
   console.log(`[${start}] wrappedSendEvent: ${JSON.stringify(event)}`);
   await postEvent(event);
-  console.log(`[${now_us()}] wrappedSendEvent done in ${now_us() - start}us`);
+  console.log(`[${now_us()}] wrappedSendEvent done in ${ms_from(start)}ms`);
 }
 
 // Check on usage
@@ -46,7 +48,7 @@ const wrappedGetHitCount = async (ip: string, lookback_sec = durationInSeconds) 
   const start = now_us();
   console.log(`[${start}] wrappedGetHitCount: ${ip}`);
   const count = await getHitCount(ip, lookback_sec);
-  console.log(`[${now_us()}] wrappedGetHitCount done in ${now_us() - start}us`);
+  console.log(`[${now_us()}] wrappedGetHitCount done in ${ms_from(start)}ms`);
   return count;
 }
 
@@ -58,7 +60,7 @@ const concurrentWriteAndCheck = async (ip: string, event: ApiEvent) => {
     wrappedGetHitCount(ip),
     wrappedSendEvent(event),
   ]);
-  console.log(`[${now_us()}] concurrentWriteAndCheck done in ${now_us() - start}us`);
+  console.log(`[${now_us()}] concurrentWriteAndCheck done in ${ms_from(start)}ms`);
   return count;
 }
 
